@@ -11,11 +11,18 @@ public class ExpenseService(IStore store) : IExpenseService
         var expenses = await store.Load<Expense>();
         var newExpense = expense with
         {
-            Id = expenses.Count == 0 ? 1 : expenses.Max(e => e.Id) + 1
+            Id = expenses.Count == 0 ? 1 : expenses.Max(e => e.Id) + 1,
+            CreatedAt = DateTime.UtcNow,
         };
 
         expenses.Add(newExpense);
         await store.Save(expenses);
         return Result.Success(newExpense.Id);
+    }
+
+    public async Task<Result<List<Expense>>> GetExpenses()
+    {
+        var expenses = await store.Load<Expense>();
+        return expenses;
     }
 }

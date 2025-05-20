@@ -29,8 +29,23 @@ app.AddCommand("add", async (
         printService.Failed(errorMessage);
         return;
     }
-    
+
     printService.Success($"Expense added successfully (ID: {result.Value})");
+});
+
+app.AddCommand("list", async (
+    IExpenseService expenseService,
+    IPrintService printService) =>
+{
+    var result = await expenseService.GetExpenses();
+    if (!result.IsSuccess)
+    {
+        var errorMessage = string.Join(", ", result.Errors);
+        printService.Failed(errorMessage);
+        return;
+    }
+    
+    printService.Table(result.Value);
 });
 
 app.Run();
