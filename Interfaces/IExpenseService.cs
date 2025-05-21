@@ -7,4 +7,5 @@ public interface IExpenseService
 {
     Task<Result<int>> AddExpense(Expense expense);
     Task<Result<List<Expense>>> GetExpenses();
+    Task<Result<decimal>> GetTotalExpenses();
 }

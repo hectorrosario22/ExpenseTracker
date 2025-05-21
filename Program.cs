@@ -1,4 +1,5 @@
-﻿using Cocona;
+﻿using System.Globalization;
+using Cocona;
 using ExpenseTracker.Interfaces;
 using ExpenseTracker.Models;
 using ExpenseTracker.Parameters;
@@ -11,6 +12,10 @@ builder.Services.AddScoped<IPrintService, PrintService>();
 builder.Services.AddScoped<IStore, JsonStore>();
 
 var app = builder.Build();
+
+var usaCulture = new CultureInfo("en-US");
+CultureInfo.CurrentCulture = usaCulture;
+CultureInfo.CurrentUICulture = usaCulture;
 
 app.AddCommand("add", async (
     AddCommandParameter parameters,
@@ -44,8 +49,23 @@ app.AddCommand("list", async (
         printService.Failed(errorMessage);
         return;
     }
-    
+
     printService.Table(result.Value);
+});
+
+app.AddCommand("summary", async (
+    IExpenseService expenseService,
+    IPrintService printService) =>
+{
+    var result = await expenseService.GetTotalExpenses();
+    if (!result.IsSuccess)
+    {
+        var errorMessage = string.Join(", ", result.Errors);
+        printService.Failed(errorMessage);
+        return;
+    }
+    
+    printService.Default($"Total expenses: {result.Value:C2}");
 });
 
 app.Run();

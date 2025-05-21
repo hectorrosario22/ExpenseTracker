@@ -12,7 +12,7 @@ public class PrintService : IPrintService
         Console.WriteLine(message);
         Console.ResetColor();
     }
-    
+
     public void Failed(string message)
     {
         Console.ForegroundColor = ConsoleColor.Red;
@@ -43,8 +43,13 @@ public class PrintService : IPrintService
                 task.Id,
                 task.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd"),
                 task.Description,
-                task.Amount.ToString("C2", new CultureInfo("en-US"))
+                task.Amount.ToString("C2")
             );
         }
+    }
+    
+    public void Default(string message)
+    {
+        Console.WriteLine(message);
     }
 }

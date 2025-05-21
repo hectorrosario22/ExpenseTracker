@@ -25,4 +25,11 @@ public class ExpenseService(IStore store) : IExpenseService
         var expenses = await store.Load<Expense>();
         return expenses;
     }
+
+    public async Task<Result<decimal>> GetTotalExpenses()
+    {
+        var expenses = await store.Load<Expense>();
+        var totalExpenses = expenses.Sum(d => d.Amount);
+        return totalExpenses;
+    }
 }
