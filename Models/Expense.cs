@@ -6,4 +6,5 @@ public record Expense
     public required string Description { get; init; }
     public required decimal Amount { get; init; }
     public DateTime CreatedAt { get; init; }
+    public DateTime? UpdatedAt { get; init; }
 }

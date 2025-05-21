@@ -20,6 +20,27 @@ public class ExpenseService(IStore store) : IExpenseService
         return Result.Success(newExpense.Id);
     }
 
+    public async Task<Result> UpdateExpense(Expense expense)
+    {
+        var expenses = await store.Load<Expense>();
+        var index = expenses.FindIndex(e => e.Id == expense.Id);
+        if (index == -1)
+        {
+            return Result.NotFound($"Expense with ID {expense.Id} not found.");
+        }
+
+        var updatedExpense = expenses[index] with
+        {
+            Description = expense.Description,
+            Amount = expense.Amount,
+            UpdatedAt = DateTime.UtcNow,
+        };
+
+        expenses[index] = updatedExpense;
+        await store.Save(expenses);
+        return Result.Success();
+    }
+
     public async Task<Result<List<Expense>>> GetExpenses()
     {
         var expenses = await store.Load<Expense>();

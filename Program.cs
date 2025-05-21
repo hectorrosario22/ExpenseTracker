@@ -38,6 +38,28 @@ app.AddCommand("add", async (
     printService.Success($"Expense added successfully (ID: {result.Value})");
 });
 
+app.AddCommand("update", async (
+    UpdateCommandParameter parameters,
+    IExpenseService expenseService,
+    IPrintService printService) =>
+{
+    Expense expense = new()
+    {
+        Id = parameters.Id,
+        Description = parameters.Description,
+        Amount = parameters.Amount
+    };
+    var result = await expenseService.UpdateExpense(expense);
+    if (!result.IsSuccess)
+    {
+        var errorMessage = string.Join(", ", result.Errors);
+        printService.Failed(errorMessage);
+        return;
+    }
+
+    printService.Success($"Expense updated successfully (ID: {parameters.Id})");
+});
+
 app.AddCommand("list", async (
     IExpenseService expenseService,
     IPrintService printService) =>

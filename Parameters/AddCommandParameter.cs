@@ -3,13 +3,13 @@ using Cocona;
 
 namespace ExpenseTracker.Parameters;
 
-public record AddCommandParameter(
-    [Required]
+public record AddCommandParameter : ICommandParameterSet
+{
     [MaxLength(100)]
-    [Option(Description = "Descripción del gasto")]
-    string Description,
+    [Option(Description = "Expense description")]
+    public required string Description { get; init; }
 
-    [Option(Description = "Monto gastado")]
+    [Option(Description = "Expense amount")]
     [Range(0, int.MaxValue)]
-    decimal Amount
-) : ICommandParameterSet;
+    public required decimal Amount { get; init; }
+}
