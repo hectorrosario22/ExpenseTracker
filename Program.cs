@@ -25,7 +25,8 @@ app.AddCommand("add", async (
     Expense expense = new()
     {
         Description = parameters.Description,
-        Amount = parameters.Amount
+        Amount = parameters.Amount,
+        Categories = [.. parameters.Categories],
     };
     var result = await expenseService.AddExpense(expense);
     if (!result.IsSuccess)
@@ -47,7 +48,8 @@ app.AddCommand("update", async (
     {
         Id = parameters.Id,
         Description = parameters.Description,
-        Amount = parameters.Amount
+        Amount = parameters.Amount,
+        Categories = [.. parameters.Categories],
     };
     var result = await expenseService.UpdateExpense(expense);
     if (!result.IsSuccess)
@@ -77,10 +79,11 @@ app.AddCommand("delete", async (
 });
 
 app.AddCommand("list", async (
+    QueryCommandParameter parameters,
     IExpenseService expenseService,
     IPrintService printService) =>
 {
-    var result = await expenseService.GetExpenses();
+    var result = await expenseService.GetExpenses(parameters.Month, parameters.Categories);
     if (!result.IsSuccess)
     {
         var errorMessage = string.Join(", ", result.Errors);
@@ -92,11 +95,11 @@ app.AddCommand("list", async (
 });
 
 app.AddCommand("summary", async (
-    SummaryCommandParameter parameters,
+    QueryCommandParameter parameters,
     IExpenseService expenseService,
     IPrintService printService) =>
 {
-    var result = await expenseService.GetTotalExpenses(parameters.Month);
+    var result = await expenseService.GetTotalExpenses(parameters.Month, parameters.Categories);
     if (!result.IsSuccess)
     {
         var errorMessage = string.Join(", ", result.Errors);

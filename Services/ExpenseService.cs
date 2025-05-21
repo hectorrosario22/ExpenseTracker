@@ -33,6 +33,7 @@ public class ExpenseService(IStore store) : IExpenseService
         {
             Description = expense.Description,
             Amount = expense.Amount,
+            Categories = expense.Categories,
             UpdatedAt = DateTime.UtcNow,
         };
 
@@ -55,22 +56,46 @@ public class ExpenseService(IStore store) : IExpenseService
         return Result.Success();
     }
 
-    public async Task<Result<List<Expense>>> GetExpenses()
+    public async Task<Result<List<Expense>>> GetExpenses(int? month = null, IEnumerable<string>? categories = null)
     {
-        var expenses = await store.Load<Expense>();
-        return expenses;
-    }
-
-    public async Task<Result<decimal>> GetTotalExpenses(int? month = null)
-    {
-        var expenses = await store.Load<Expense>();
+        IEnumerable<Expense> expenses = await store.Load<Expense>();
         if (month.HasValue)
         {
             var currentYear = DateTime.UtcNow.Year;
-            expenses = [.. expenses.Where(d =>
+            expenses = expenses.Where(d =>
                 d.CreatedAt.Month == month.Value
                 && d.CreatedAt.Year == currentYear
-            )];
+            );
+        }
+
+        if (categories is not null && categories.Any())
+        {
+            var currentYear = DateTime.UtcNow.Year;
+            expenses = expenses.Where(d =>
+                d.Categories.Overlaps(categories)
+            );
+        }
+        return expenses.ToList();
+    }
+
+    public async Task<Result<decimal>> GetTotalExpenses(int? month = null, IEnumerable<string>? categories = null)
+    {
+        IEnumerable<Expense> expenses = await store.Load<Expense>();
+        if (month.HasValue)
+        {
+            var currentYear = DateTime.UtcNow.Year;
+            expenses = expenses.Where(d =>
+                d.CreatedAt.Month == month.Value
+                && d.CreatedAt.Year == currentYear
+            );
+        }
+
+        if (categories is not null && categories.Any())
+        {
+            var currentYear = DateTime.UtcNow.Year;
+            expenses = expenses.Where(d =>
+                d.Categories.Overlaps(categories)
+            );
         }
         
         var totalExpenses = expenses.Sum(d => d.Amount);

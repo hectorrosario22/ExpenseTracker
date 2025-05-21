@@ -12,4 +12,7 @@ public record AddCommandParameter : ICommandParameterSet
     [Option(Description = "Expense amount")]
     [Range(0, int.MaxValue)]
     public required decimal Amount { get; init; }
+
+    [Option(Description = "Expense categories")]
+    public required IEnumerable<string> Categories { get; init; }
 }
