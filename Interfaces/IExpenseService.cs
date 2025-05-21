@@ -9,5 +9,5 @@ public interface IExpenseService
     Task<Result> UpdateExpense(Expense expense);
     Task<Result> DeleteExpense(int id);
     Task<Result<List<Expense>>> GetExpenses();
-    Task<Result<decimal>> GetTotalExpenses();
+    Task<Result<decimal>> GetTotalExpenses(int? month = null);
 }

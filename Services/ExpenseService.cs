@@ -61,9 +61,18 @@ public class ExpenseService(IStore store) : IExpenseService
         return expenses;
     }
 
-    public async Task<Result<decimal>> GetTotalExpenses()
+    public async Task<Result<decimal>> GetTotalExpenses(int? month = null)
     {
         var expenses = await store.Load<Expense>();
+        if (month.HasValue)
+        {
+            var currentYear = DateTime.UtcNow.Year;
+            expenses = [.. expenses.Where(d =>
+                d.CreatedAt.Month == month.Value
+                && d.CreatedAt.Year == currentYear
+            )];
+        }
+        
         var totalExpenses = expenses.Sum(d => d.Amount);
         return totalExpenses;
     }

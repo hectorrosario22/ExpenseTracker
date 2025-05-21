@@ -92,10 +92,11 @@ app.AddCommand("list", async (
 });
 
 app.AddCommand("summary", async (
+    SummaryCommandParameter parameters,
     IExpenseService expenseService,
     IPrintService printService) =>
 {
-    var result = await expenseService.GetTotalExpenses();
+    var result = await expenseService.GetTotalExpenses(parameters.Month);
     if (!result.IsSuccess)
     {
         var errorMessage = string.Join(", ", result.Errors);
