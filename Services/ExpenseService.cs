@@ -41,6 +41,20 @@ public class ExpenseService(IStore store) : IExpenseService
         return Result.Success();
     }
 
+    public async Task<Result> DeleteExpense(int id)
+    {
+        var expenses = await store.Load<Expense>();
+        var index = expenses.FindIndex(e => e.Id == id);
+        if (index == -1)
+        {
+            return Result.NotFound($"Expense with ID {id} not found.");
+        }
+
+        expenses.RemoveAt(index);
+        await store.Save(expenses);
+        return Result.Success();
+    }
+
     public async Task<Result<List<Expense>>> GetExpenses()
     {
         var expenses = await store.Load<Expense>();

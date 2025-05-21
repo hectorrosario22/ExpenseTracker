@@ -60,6 +60,22 @@ app.AddCommand("update", async (
     printService.Success($"Expense updated successfully (ID: {parameters.Id})");
 });
 
+app.AddCommand("delete", async (
+    DeleteCommandParameter parameters,
+    IExpenseService expenseService,
+    IPrintService printService) =>
+{
+    var result = await expenseService.DeleteExpense(parameters.Id);
+    if (!result.IsSuccess)
+    {
+        var errorMessage = string.Join(", ", result.Errors);
+        printService.Failed(errorMessage);
+        return;
+    }
+
+    printService.Success($"Expense deleted successfully (ID: {parameters.Id})");
+});
+
 app.AddCommand("list", async (
     IExpenseService expenseService,
     IPrintService printService) =>
