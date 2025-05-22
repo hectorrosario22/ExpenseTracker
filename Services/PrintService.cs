@@ -27,13 +27,14 @@ public class PrintService : IPrintService
             return;
         }
 
-        string[] headers = ["ID", "Date", "Description", "Amount"];
+        string[] headers = ["ID", "Date", "Description", "Amount", "Category"];
 
         int widthID = Math.Max(headers[0].Length, expenses.Max(t => t.Id.ToString().Length));
         int widthDescription = Math.Max(headers[2].Length, expenses.Max(t => t.Description.Length));
+        int widthAmount = Math.Max(headers[3].Length, expenses.Max(t => t.Amount.ToString("C2").Length));
 
-        string format = $"{{0,-{widthID}}} | {{1,-10}} | {{2,-{widthDescription}}} | {{3}}";
-        Console.WriteLine(format, headers[0], headers[1], headers[2], headers[3]);
+        string format = $"{{0,-{widthID}}} | {{1,-10}} | {{2,-{widthDescription}}} | {{3,-{widthAmount}}} | {{4}}";
+        Console.WriteLine(format, headers[0], headers[1], headers[2], headers[3], headers[4]);
 
         foreach (var task in expenses)
         {
@@ -42,7 +43,8 @@ public class PrintService : IPrintService
                 task.Id,
                 task.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd"),
                 task.Description,
-                task.Amount.ToString("C2")
+                task.Amount.ToString("C2"),
+                string.Join(", ", task.Categories)
             );
         }
     }
