@@ -1,4 +1,3 @@
-using System.Globalization;
 using ExpenseTracker.Interfaces;
 using ExpenseTracker.Models;
 
@@ -47,7 +46,7 @@ public class PrintService : IPrintService
             );
         }
     }
-    
+
     public void Default(string message)
     {
         Console.WriteLine(message);

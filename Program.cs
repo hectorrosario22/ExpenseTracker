@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = CoconaApp.CreateBuilder(args);
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<IPrintService, PrintService>();
 builder.Services.AddScoped<IStore, JsonStore>();
 
@@ -106,8 +107,26 @@ app.AddCommand("summary", async (
         printService.Failed(errorMessage);
         return;
     }
-    
+
     printService.Default($"Total expenses: {result.Value:C2}");
+});
+
+app.AddCommand("csv", async (
+    QueryCommandParameter parameters,
+    IExpenseService expenseService,
+    IPrintService printService,
+    IExportService exportService) =>
+{
+    var result = await expenseService.GetExpenses(parameters.Month, parameters.Categories);
+    if (!result.IsSuccess)
+    {
+        var errorMessage = string.Join(", ", result.Errors);
+        printService.Failed(errorMessage);
+        return;
+    }
+
+    var filePath = await exportService.ToCsv(result.Value);
+    printService.Success($"Expenses exported successfully to '{filePath}'");
 });
 
 app.Run();
