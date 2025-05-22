@@ -11,6 +11,6 @@ public record QueryCommandParameter : ICommandParameterSet
     public int? Month { get; init; }
     
     [HasDefaultValue]
-    [Option(Description = "Categories")]
+    [Option("category", Description = "Categories")]
     public IEnumerable<string>? Categories { get; init; }
 }
