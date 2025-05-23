@@ -2,6 +2,6 @@ namespace ExpenseTracker.Interfaces;
 
 public interface IStore
 {
-    Task Save<T>(T data);
-    Task<List<T>> Load<T>();
+    Task Save<T>(string sectionName, T data);
+    Task<T?> Load<T>(string sectionName);
 }

@@ -8,7 +8,7 @@ public class ExpenseService(IStore store) : IExpenseService
 {
     public async Task<Result<int>> AddExpense(Expense expense)
     {
-        var expenses = await store.Load<Expense>();
+        var expenses = await store.Load<List<Expense>>(Expense.SectionName) ?? [];
         var newExpense = expense with
         {
             Id = expenses.Count == 0 ? 1 : expenses.Max(e => e.Id) + 1,
@@ -16,13 +16,13 @@ public class ExpenseService(IStore store) : IExpenseService
         };
 
         expenses.Add(newExpense);
-        await store.Save(expenses);
+        await store.Save(Expense.SectionName, expenses);
         return Result.Success(newExpense.Id);
     }
 
     public async Task<Result> UpdateExpense(Expense expense)
     {
-        var expenses = await store.Load<Expense>();
+        var expenses = await store.Load<List<Expense>>(Expense.SectionName) ?? [];
         var index = expenses.FindIndex(e => e.Id == expense.Id);
         if (index == -1)
         {
@@ -38,13 +38,13 @@ public class ExpenseService(IStore store) : IExpenseService
         };
 
         expenses[index] = updatedExpense;
-        await store.Save(expenses);
+        await store.Save(Expense.SectionName, expenses);
         return Result.Success();
     }
 
     public async Task<Result> DeleteExpense(int id)
     {
-        var expenses = await store.Load<Expense>();
+        var expenses = await store.Load<List<Expense>>(Expense.SectionName) ?? [];
         var index = expenses.FindIndex(e => e.Id == id);
         if (index == -1)
         {
@@ -52,13 +52,13 @@ public class ExpenseService(IStore store) : IExpenseService
         }
 
         expenses.RemoveAt(index);
-        await store.Save(expenses);
+        await store.Save(Expense.SectionName, expenses);
         return Result.Success();
     }
 
     public async Task<Result<List<Expense>>> GetExpenses(int? month = null, IEnumerable<string>? categories = null)
     {
-        IEnumerable<Expense> expenses = await store.Load<Expense>();
+        IEnumerable<Expense> expenses = await store.Load<List<Expense>>(Expense.SectionName) ?? [];
         if (month.HasValue)
         {
             var currentYear = DateTime.UtcNow.Year;
@@ -80,7 +80,7 @@ public class ExpenseService(IStore store) : IExpenseService
 
     public async Task<Result<decimal>> GetTotalExpenses(int? month = null, IEnumerable<string>? categories = null)
     {
-        IEnumerable<Expense> expenses = await store.Load<Expense>();
+        IEnumerable<Expense> expenses = await store.Load<List<Expense>>(Expense.SectionName) ?? [];
         if (month.HasValue)
         {
             var currentYear = DateTime.UtcNow.Year;
@@ -97,7 +97,7 @@ public class ExpenseService(IStore store) : IExpenseService
                 d.Categories.Overlaps(categories)
             );
         }
-        
+
         var totalExpenses = expenses.Sum(d => d.Amount);
         return totalExpenses;
     }

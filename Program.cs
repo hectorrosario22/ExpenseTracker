@@ -7,6 +7,7 @@ using ExpenseTracker.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = CoconaApp.CreateBuilder(args);
+builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<IPrintService, PrintService>();
@@ -17,6 +18,26 @@ var app = builder.Build();
 var usaCulture = new CultureInfo("en-US");
 CultureInfo.CurrentCulture = usaCulture;
 CultureInfo.CurrentUICulture = usaCulture;
+
+app.AddCommand("budget", async (
+    BudgetCommandParameter parameters,
+    IBudgetService budgetService,
+    IPrintService printService) =>
+{
+    Budget budget = new()
+    {
+        MonthlyExpenses = parameters.MonthlyExpenses,
+    };
+    var result = await budgetService.UpdateBudget(budget);
+    if (!result.IsSuccess)
+    {
+        var errorMessage = string.Join(", ", result.Errors);
+        printService.Failed(errorMessage);
+        return;
+    }
+
+    printService.Success("Budget updated successfully");
+});
 
 app.AddCommand("add", async (
     AddCommandParameter parameters,

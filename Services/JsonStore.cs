@@ -5,7 +5,7 @@ namespace ExpenseTracker.Services;
 
 public class JsonStore : IStore
 {
-    private readonly string _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "expenses.json");
+    private readonly string _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "db.json");
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         AllowTrailingCommas = false,
@@ -17,26 +17,55 @@ public class JsonStore : IStore
     {
         if (!File.Exists(_filePath))
         {
-            File.WriteAllText(_filePath, "[]");
+            File.WriteAllText(_filePath, "{}");
         }
     }
 
-    public async Task<List<T>> Load<T>()
+    public async Task<T?> Load<T>(string sectionName)
     {
         using FileStream stream = File.Open(
             _filePath, FileMode.Open,
             FileAccess.Read, FileShare.Read
         );
-        var items = await JsonSerializer.DeserializeAsync<List<T>>(stream, _jsonOptions);
-        return items ?? [];
+
+        var document = await JsonDocument.ParseAsync(stream);
+        var root = document.RootElement;
+        if (!root.TryGetProperty(sectionName, out var section))
+        {
+            return default;
+        }
+
+        var sectionJson = root.GetProperty(sectionName).GetRawText();
+        var data = JsonSerializer.Deserialize<T>(sectionJson, _jsonOptions);
+        return data;
     }
 
-    public async Task Save<T>(T data)
+    public async Task Save<T>(string sectionName, T data)
     {
-        using FileStream stream = File.Open(
+        // Read the existing JSON file
+        Dictionary<string, JsonElement> jsonContent;
+        using (FileStream readStream = File.OpenRead(_filePath))
+        {
+            jsonContent = await JsonSerializer.DeserializeAsync<Dictionary<string, JsonElement>>(readStream)
+                ?? [];
+        }
+
+        // Convert the updated data to JSON
+        JsonElement updatedSection;
+        using (MemoryStream ms = new())
+        {
+            await JsonSerializer.SerializeAsync(ms, data, _jsonOptions);
+            ms.Position = 0;
+            updatedSection = await JsonSerializer.DeserializeAsync<JsonElement>(ms);
+        }
+
+        // Update the section in the JSON content
+        jsonContent[sectionName] = updatedSection;
+
+        using FileStream writeStream = File.Open(
             _filePath, FileMode.Create,
             FileAccess.Write, FileShare.None
         );
-        await JsonSerializer.SerializeAsync(stream, data, _jsonOptions);
+        await JsonSerializer.SerializeAsync(writeStream, jsonContent, _jsonOptions);
     }
 }
