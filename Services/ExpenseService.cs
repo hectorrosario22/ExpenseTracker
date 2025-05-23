@@ -26,7 +26,7 @@ public class ExpenseService(
             && d.CreatedAt.Year == DateTime.UtcNow.Year
         ).Sum(e => e.Amount);
 
-        return totalExpenses > monthlyExpensesBudget
+        return monthlyExpensesBudget > 0 && totalExpenses > monthlyExpensesBudget
             ? Result.Success(newExpense.Id, $"Be careful! You have exceeded your monthly budget of {monthlyExpensesBudget:C2}.")
             : Result.Success(newExpense.Id);
     }
@@ -57,7 +57,7 @@ public class ExpenseService(
             && d.CreatedAt.Year == DateTime.UtcNow.Year
         ).Sum(e => e.Amount);
 
-        return totalExpenses > monthlyExpensesBudget
+        return monthlyExpensesBudget > 0 && totalExpenses > monthlyExpensesBudget
             ? Result.SuccessWithMessage($"Be careful! You have exceeded your monthly budget of {monthlyExpensesBudget:C2}.")
             : Result.Success();
     }
