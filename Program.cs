@@ -59,6 +59,10 @@ app.AddCommand("add", async (
     }
 
     printService.Success($"Expense added successfully (ID: {result.Value})");
+    if (!string.IsNullOrWhiteSpace(result.SuccessMessage))
+    {
+        printService.Warning(result.SuccessMessage);
+    }
 });
 
 app.AddCommand("update", async (
@@ -82,6 +86,10 @@ app.AddCommand("update", async (
     }
 
     printService.Success($"Expense updated successfully (ID: {parameters.Id})");
+    if (!string.IsNullOrWhiteSpace(result.SuccessMessage))
+    {
+        printService.Warning(result.SuccessMessage);
+    }
 });
 
 app.AddCommand("delete", async (

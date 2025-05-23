@@ -53,4 +53,11 @@ public class PrintService : IPrintService
     {
         Console.WriteLine(message);
     }
+
+    public void Warning(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine(message);
+        Console.ResetColor();
+    }
 }

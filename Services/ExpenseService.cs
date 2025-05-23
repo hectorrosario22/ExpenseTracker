@@ -4,7 +4,9 @@ using ExpenseTracker.Models;
 
 namespace ExpenseTracker.Services;
 
-public class ExpenseService(IStore store) : IExpenseService
+public class ExpenseService(
+    IStore store,
+    IBudgetService budgetService) : IExpenseService
 {
     public async Task<Result<int>> AddExpense(Expense expense)
     {
@@ -17,7 +19,16 @@ public class ExpenseService(IStore store) : IExpenseService
 
         expenses.Add(newExpense);
         await store.Save(Expense.SectionName, expenses);
-        return Result.Success(newExpense.Id);
+
+        var monthlyExpensesBudget = await budgetService.GetMonthlyExpensesBudget();
+        var totalExpenses = expenses.Where(d =>
+            d.CreatedAt.Month == DateTime.UtcNow.Month
+            && d.CreatedAt.Year == DateTime.UtcNow.Year
+        ).Sum(e => e.Amount);
+
+        return totalExpenses > monthlyExpensesBudget
+            ? Result.Success(newExpense.Id, $"Be careful! You have exceeded your monthly budget of {monthlyExpensesBudget:C2}.")
+            : Result.Success(newExpense.Id);
     }
 
     public async Task<Result> UpdateExpense(Expense expense)
@@ -39,7 +50,16 @@ public class ExpenseService(IStore store) : IExpenseService
 
         expenses[index] = updatedExpense;
         await store.Save(Expense.SectionName, expenses);
-        return Result.Success();
+
+        var monthlyExpensesBudget = await budgetService.GetMonthlyExpensesBudget();
+        var totalExpenses = expenses.Where(d =>
+            d.CreatedAt.Month == DateTime.UtcNow.Month
+            && d.CreatedAt.Year == DateTime.UtcNow.Year
+        ).Sum(e => e.Amount);
+
+        return totalExpenses > monthlyExpensesBudget
+            ? Result.SuccessWithMessage($"Be careful! You have exceeded your monthly budget of {monthlyExpensesBudget:C2}.")
+            : Result.Success();
     }
 
     public async Task<Result> DeleteExpense(int id)

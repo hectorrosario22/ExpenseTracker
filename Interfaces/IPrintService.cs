@@ -8,4 +8,5 @@ public interface IPrintService
     void Failed(string message);
     void Table(List<Expense> expenses);
     void Default(string message);
+    void Warning(string message);
 }
